@@ -7,72 +7,73 @@ namespace Szn.Framework.UtilPackage
     {
         static UnityPathTools()
         {
-            string platform;
             switch (Application.platform)
             {
+#if UNITY_EDITOR
                 case RuntimePlatform.OSXEditor:
                 case RuntimePlatform.WindowsEditor:
-#if UNITY_EDITOR
                     switch (UnityEditor.EditorUserBuildSettings.activeBuildTarget)
                     {
-                        case UnityEditor.BuildTarget.StandaloneWindows:
-                            platform = "Win";
-                            break;
-
                         case UnityEditor.BuildTarget.iOS:
-                            platform = "iOS";
+                            _platform = "iOS";
                             break;
 
                         case UnityEditor.BuildTarget.Android:
-                            platform = "Android";
-                            break;
-                        
-                        default:
-                            platform = "Unknown";
+                            _platform = "Android";
                             break;
                     }
+                    break;
 #endif
-                    break;
 
-                case RuntimePlatform.OSXPlayer:
                 case RuntimePlatform.IPhonePlayer:
-                    platform = "iOS";
-                    break;
-
-                case RuntimePlatform.WindowsPlayer:
-                    platform = "Win";
+                    _platform = "iOS";
                     break;
 
                 case RuntimePlatform.Android:
-                    platform = "Android";
-                    break;
-                
-                default:
-                    platform = "Unknown";
+                    _platform = "Android";
                     break;
             }
 
-
-            _persistentDataPath = Path.Combine(Application.persistentDataPath, platform);
-            _streamingAssetsPath = Path.Combine(Application.streamingAssetsPath, platform);
+            _persistentDataPath = Application.persistentDataPath;
+            _streamingAssetsPath = Path.Combine(Application.streamingAssetsPath, _platform);
+            
+#if UNITY_EDITOR
+            _streamingAssetsUrl = Path.Combine($"file:///{Application.streamingAssetsPath}", _platform);
+#elif UNITY_ANDROID
+            _streamingAssetsUrl = Path.Combine(Application.streamingAssetsPath, _platform);
+#elif UNITY_IOS
+            _streamingAssetsUrl = Path.Combine($"file://{Application.streamingAssetsPath}", _platform);
+#endif
+        }
+        private static readonly string _platform = "Unknown";
+        public static string GetPlatform()
+        {
+            return _platform;
         }
 
         private static readonly string _streamingAssetsPath;
+
         public static string GetStreamingAssetsPath(string InSubPath = null)
         {
             if (string.IsNullOrEmpty(InSubPath)) return _streamingAssetsPath;
-
             return Path.Combine(_streamingAssetsPath, InSubPath);
         }
 
         private static readonly string _persistentDataPath;
-        public static string GetPersistentDataPath (string InSubPath = null)
+
+        public static string GetPersistentDataPath(string InSubPath = null)
         {
             if (string.IsNullOrEmpty(InSubPath)) return _persistentDataPath;
 
             return Path.Combine(_persistentDataPath, InSubPath);
         }
+
+        private static readonly string _streamingAssetsUrl;
+        public static string GetStreamingAssetsUrl(string InSubPath = null)
+        {
+            if (string.IsNullOrEmpty(InSubPath)) return _streamingAssetsUrl;
+
+            return Path.Combine(_streamingAssetsUrl, InSubPath);
+        }
     }
-
 }
-
