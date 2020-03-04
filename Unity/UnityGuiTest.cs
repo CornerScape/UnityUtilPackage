@@ -20,23 +20,28 @@ namespace Szn.Framework.UtilPackage
         private Rect logWinRect;
         private Rect screenRect;
 
-        public static Action UnityGUIAction;
+        public static event Action UnityGUIAction;
 
         private void Awake()
         {
             width = Screen.width;
             height = Screen.height;
-            logWinRect = new Rect(width * .375f, height * .4f, width * .25f, height * .2f);
+            logWinRect = new Rect(width * .3f, height * .4f, width * .4f, height * .2f);
             screenRect = new Rect(0, 0, width, height);
         }
 
         private void OnGUI()
         {
-            logWinRect = GUI.Window(0, logWinRect, LogWindow, "H5 Simulate");
+            logWinRect = GUI.Window(0, logWinRect, LogWindow, "Unity GUI Window");
         }
 
         private void LogWindow(int InWindowId)
         {
+            GUI.skin.button.fontSize = 32;
+            if (GUILayout.Button("Close"))
+            {
+                DestroyImmediate(gameObject);
+            }
             UnityGUIAction?.Invoke();
             GUI.DragWindow(screenRect);
         }
